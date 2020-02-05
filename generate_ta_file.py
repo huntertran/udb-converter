@@ -20,11 +20,11 @@ def write_instance(ta_file, db):
     current_path = pathlib.Path(__file__).parent.absolute()
 
     for file in db.ents("file"):
-        if(str(current_path) in file.longname()):
-            relative_path = file.longname()[len(str(current_path)):]
-            relative_path = relative_path.replace("\\","/")
-            ta_file.write("$INSTANCE " + relative_path + " cFile")
-            ta_file.write('\n')
+        # if(str(current_path) in file.longname()):
+        # relative_path = file.longname()[len(str(current_path)):]
+        relative_path = file.relname().replace("\\","/")
+        ta_file.write("$INSTANCE " + relative_path + " cFile")
+        ta_file.write('\n')
     
     folders = [x[0] for x in os.walk(os.path.join(current_path, "sources", "nginx"))]
     for folder in folders:

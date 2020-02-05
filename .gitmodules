@@ -1,0 +1,3 @@
+[submodule "sources/nginx"]
+	path = sources/nginx
+	url = https://github.com/nginx/nginx.git

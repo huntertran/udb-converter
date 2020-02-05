@@ -51,11 +51,20 @@ def write_contain(ta_file, db):
                 ta_file.write("contain " + cleanup_path(root, str(current_path)) + " " + cleanup_path(root, str(current_path)) + file_path)
                 ta_file.write('\n')
 
+def write_clinks(ta_file, db):
+    current_path_str = str(pathlib.Path(__file__).parent.absolute())
+    for file in db.ents("file"):
+        if(current_path_str.lower() in file.longname().lower()):
+            file_path = cleanup_path(file.longname(), current_path_str)
+            related_paths = file.depends()
+            for related_path in related_paths:
+                ta_file.write("cLinks " + file_path + " " + related_path)
+                ta_file.write('\n')
+
 db = understand.open("nginx.udb")
-# for file in db.ents("file"):
-    # if source in file.longname():
-    # print(file.longname())
 ta_file = open_file_for_write()
 write_common_part(ta_file)
 write_instance(ta_file, db)
 write_contain(ta_file, db)
+write_clinks(ta_file,db)
+ta_file.close()

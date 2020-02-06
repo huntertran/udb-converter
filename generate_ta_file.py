@@ -58,7 +58,7 @@ def write_clinks(ta_file, db):
             file_path = cleanup_path(file.longname(), current_path_str)
             related_paths = file.depends()
             for related_path in related_paths:
-                ta_file.write("cLinks " + file_path + " " + related_path)
+                ta_file.write("cLinks " + file.relname() + " " + related_path.relname())
                 ta_file.write('\n')
 
 db = understand.open("nginx.udb")

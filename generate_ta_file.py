@@ -17,9 +17,11 @@ class understand_to_lsedit_converter(object):
         self.ta_file.truncate(0)
 
     def write_common_part(self):
-        common_part = open("common_part.txt")
-        for line in common_part.readlines():
-            self.ta_file.write(line)
+        # common_part = open("common_part.txt")
+        # for line in common_part.readlines():
+        #     self.ta_file.write(line)
+        common_part = "SCHEME TUPLE :\ncLinks		cFunction	cFunction\ncontain		cFunction		cFunction\n// Relation Inheritance\nSCHEME ATTRIBUTE : \ncSubSystem {\n	class_style = 4\n	color = (0.0 0.0 1.0)\n}\ncFile {\n	class_style = 2\n	color = (0.9 0.9 0.9)\n	labelcolor = (0.0 0.0 0.0)\n}\ncFunction {\n	color = (1.0 0.0 0.0)\n	labelcolor = (0.0 0.0 0.0)\n}\n(cLinks) {\n	color = (0.0 0.0 0.0)\n}FACT TUPLE :\n"
+        self.ta_file.write(common_part)
         self.ta_file.write('\n')
 
     def extract_parent_folder(self, file):
@@ -57,7 +59,7 @@ class understand_to_lsedit_converter(object):
 
             if ":" not in folder_path and ":" not in file_path:
                 self.ta_file.write(
-                    "contain /" + folder_path + " /" + file_path)
+                    "contain /" + folder_path + " /" + folder_path + file_path)
                 self.ta_file.write("\n")
 
         # folder contains in folder

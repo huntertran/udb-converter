@@ -21,24 +21,27 @@ class understand_to_lsedit_converter(object):
         for line in common_part.readlines():
             self.ta_file.write(line)
         self.ta_file.write('\n')
-    
+
     def extract_parent_folder(self, file):
         full_path = file.relname()
         return full_path[:-len(file.name())]
 
     def write_instance(self):
-        current_path = pathlib.Path(__file__).parent.absolute()
 
         for file in self.db.ents("file"):
-            self.ta_file.write("$INSTANCE " + self.cleanup_path(file.relname(), "") + " cFile")
-            self.ta_file.write('\n')
+            if ":" not in file.relname():
+                self.ta_file.write(
+                    "$INSTANCE /" + self.cleanup_path(file.relname(), "") + " cFile")
+                self.ta_file.write('\n')
             folder = self.extract_parent_folder(file)
             if folder not in self.folders:
                 self.folders.append(folder)
 
         for folder in self.folders:
-            self.ta_file.write("$INSTANCE " + self.cleanup_path(folder, "") + " cSubSystem")
-            self.ta_file.write('\n')
+            if ":" not in folder:
+                self.ta_file.write(
+                    "$INSTANCE /" + self.cleanup_path(folder, "") + " cSubSystem")
+                self.ta_file.write('\n')
 
     def cleanup_path(self, path, root_to_remove):
         clean_path = path[len(str(root_to_remove)):]
@@ -48,10 +51,14 @@ class understand_to_lsedit_converter(object):
 
         # file contains in folder
         for file in self.db.ents("file"):
-            folder_path = self.cleanup_path(self.extract_parent_folder(file), "")
+            folder_path = self.cleanup_path(
+                self.extract_parent_folder(file), "")
             file_path = self.cleanup_path(file.name(), "")
-            self.ta_file.write("contain " + folder_path + " " + file_path)
-            self.ta_file.write("\n")
+
+            if ":" not in folder_path and ":" not in file_path:
+                self.ta_file.write(
+                    "contain /" + folder_path + " /" + file_path)
+                self.ta_file.write("\n")
 
         # folder contains in folder
 
@@ -72,7 +79,7 @@ class understand_to_lsedit_converter(object):
                     break
             if not isFolderPathExisted:
                 unique_folders.append(folder)
-        
+
         for unique_folder in unique_folders:
             folders = unique_folder.split("\\")
             folders = [folder for folder in folders if folder != ""]
@@ -95,23 +102,24 @@ class understand_to_lsedit_converter(object):
         current_folders_scope.pop()
         parent_folder = "/".join(current_folders_scope)
         if parent_folder != "":
-            self.ta_file.write("contain " + parent_folder + " " + child_folder)
+            self.ta_file.write(
+                "contain /" + parent_folder + " /" + child_folder)
             self.ta_file.write('\n')
 
     def write_clinks(self):
-        current_path_str = str(pathlib.Path(__file__).parent.absolute())
         for file in self.db.ents("file"):
-            if(current_path_str.lower() in file.longname().lower()):
-                file_path = self.cleanup_path(file.longname(), current_path_str)
-                related_paths = file.depends()
-                for related_path in related_paths:
-                    self.ta_file.write("cLinks " + file.relname() +
-                                  " " + related_path.relname())
+            related_paths = file.depends()
+            for related_path in related_paths:
+                if ":" not in file.relname() and ":" not in related_path.relname():
+                    self.ta_file.write("cLinks /"
+                    + self.cleanup_path(file.relname(), "")
+                    + " /" + self.cleanup_path(related_path.relname(), ""))
+
                     self.ta_file.write('\n')
 
     def convert(self, udb_file_path):
-        self.db = understand.open(udb_file_path)
-        self.ta_file = self.open_file_for_write()
+        self.db=understand.open(udb_file_path)
+        self.ta_file=self.open_file_for_write()
         self.write_common_part()
         self.write_instance()
         self.write_contain()
@@ -119,5 +127,5 @@ class understand_to_lsedit_converter(object):
         self.ta_file.close()
 
 
-converter = understand_to_lsedit_converter()
+converter=understand_to_lsedit_converter()
 converter.convert("nginx.udb")

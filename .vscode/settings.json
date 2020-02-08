@@ -3,5 +3,7 @@
     "cSpell.words": [
         "Lsedit",
         "ents"
-    ]
+    ],
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true
 }

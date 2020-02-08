@@ -9,8 +9,8 @@ class understand_to_lsedit_converter(object):
     ta_file = ""
     folders = []
 
-    def open_file_for_write(self):
-        ta_file = open("nginx_architecture.ta", "w")
+    def open_file_for_write(self, file_name):
+        ta_file = open(file_name, "w")
         return ta_file
 
     def clear_content(self):
@@ -117,9 +117,9 @@ class understand_to_lsedit_converter(object):
 
                     self.ta_file.write('\n')
 
-    def convert(self, udb_file_path):
+    def convert(self, udb_file_path, ta_file_path):
         self.db=understand.open(udb_file_path)
-        self.ta_file=self.open_file_for_write()
+        self.ta_file=self.open_file_for_write(ta_file_path)
         self.write_common_part()
         self.write_instance()
         self.write_contain()
@@ -128,4 +128,4 @@ class understand_to_lsedit_converter(object):
 
 
 converter=understand_to_lsedit_converter()
-converter.convert("nginx.udb")
+converter.convert("demo\\nginx.udb","demo\\nginx_architecture.ta")

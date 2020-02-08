@@ -40,45 +40,63 @@ class understand_to_lsedit_converter(object):
             self.ta_file.write("$INSTANCE " + self.cleanup_path(folder, "") + " cSubSystem")
             self.ta_file.write('\n')
 
-        # folders = [x[0]
-        #            for x in os.walk(os.path.join(current_path, "sources", "nginx"))]
-        # for folder in folders:
-        #     if(str(current_path) in folder):
-        #         folder_path = folder[len(str(current_path)):]
-        #         folder_path = folder_path.replace("\\", "/")
-        #         self.ta_file.write("$INSTANCE " + folder_path + " cSubSystem")
-        #         self.ta_file.write('\n')
-
     def cleanup_path(self, path, root_to_remove):
         clean_path = path[len(str(root_to_remove)):]
         return clean_path.replace("\\", "/")
 
     def write_contain(self):
-        # current_path = pathlib.Path(__file__).parent.absolute()
-        # folders = [x[0]
-        #            for x in os.walk(os.path.join(current_path, "sources", "nginx"))]
-        # for folder in folders:
-        #     for root, dirs, files in os.walk(folder):
-        #         for sub_dir in dirs:
-        #             self.ta_file.write("contain " + self.cleanup_path(root, str(current_path)) +
-        #                           " " + self.cleanup_path(root, str(current_path)) + sub_dir)
-        #             self.ta_file.write('\n')
-        #         for file_path in files:
-        #             self.ta_file.write("contain " + self.cleanup_path(root, str(current_path)) +
-        #                           " " + self.cleanup_path(root, str(current_path)) + file_path)
-        #             self.ta_file.write('\n')
 
         # file contains in folder
         for file in self.db.ents("file"):
             folder_path = self.cleanup_path(self.extract_parent_folder(file), "")
             file_path = self.cleanup_path(file.name(), "")
             self.ta_file.write("contain " + folder_path + " " + file_path)
+            self.ta_file.write("\n")
 
         # folder contains in folder
+
+        unique_folders = [""]
+        # remove first party's libraries that was used by source code
+        self.folders = [folder for folder in self.folders if ":" not in folder]
+        # merge folders' path to the longest unique
         self.folders.sort()
-        for index, folder in enumerate(self.folders):
-            if index < (len(self.folders) - 1) and folder in self.folders[index + 1]:
-                # TODO: need implementation
+
+        for folder in self.folders:
+            isFolderPathExisted = False
+            for unique_folder in unique_folders:
+                if folder in unique_folder:
+                    isFolderPathExisted = True
+                    break
+                if unique_folder in folder:
+                    unique_folders.remove(unique_folder)
+                    break
+            if not isFolderPathExisted:
+                unique_folders.append(folder)
+        
+        for unique_folder in unique_folders:
+            folders = unique_folder.split("\\")
+            folders = [folder for folder in folders if folder != ""]
+            self.populate_folders(folders)
+
+    def populate_folders(self, folders):
+        if len(folders) <= 2:
+            current_folders_scope = folders
+            self.write_folder_contain_folder(current_folders_scope)
+        else:
+            for index in range(1, len(folders)):
+                current_folders_scope = []
+                for j in range(0, index+1):
+                    current_folders_scope.append(folders[j])
+
+                self.write_folder_contain_folder(current_folders_scope)
+
+    def write_folder_contain_folder(self, current_folders_scope):
+        child_folder = "/".join(current_folders_scope)
+        current_folders_scope.pop()
+        parent_folder = "/".join(current_folders_scope)
+        if parent_folder != "":
+            self.ta_file.write("contain " + parent_folder + " " + child_folder)
+            self.ta_file.write('\n')
 
     def write_clinks(self):
         current_path_str = str(pathlib.Path(__file__).parent.absolute())

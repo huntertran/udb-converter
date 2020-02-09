@@ -105,7 +105,7 @@ class understand_to_lsedit_converter(object):
         parent_folder = "/".join(current_folders_scope)
         if parent_folder != "":
             self.ta_file.write(
-                "contain /" + parent_folder + " /" + child_folder)
+                "contain /" + parent_folder + "/ /" + child_folder + "/")
             self.ta_file.write('\n')
 
     def write_clinks(self):
